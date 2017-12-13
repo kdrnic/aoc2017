@@ -18,7 +18,7 @@ function Dist(x, y){
 	y = Math.abs(y);
 	if(x > y) return (y / 0.5) + (x - y) * 0.5;
 	return (y - (x / 0.5) * 0.5) + (x / 0.5);
-}
+} 
 
 furthest = -1;
 
