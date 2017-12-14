@@ -1,11 +1,13 @@
-fs = require("fs");
-inp = fs.readFileSync("input14.txt").toString().filter(l => l.length);
+key = "jzgqcdpd";
 
 function DoHash(lengths){
 	var listSize = 256;
 	var list = Array(listSize).fill(0).map((e, i) => i);
 	var curr = 0;
 	var skip = 0;
+	
+	if(typeof lengths == "string") lengths = lengths.map(e => e.charCodeAt(0));
+	lengths = lengths.concat([17, 31, 73, 47, 23]);
 	
 	function DoRound(){
 		var lengs = lengths.slice();
@@ -28,3 +30,4 @@ function DoHash(lengths){
 	while(list.length) sparse.push(list.splice(0, 16));
 	return sparse.map(b => b.reduce((acc, e, i, a) => acc ^ e, 0));
 }
+
