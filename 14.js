@@ -1,9 +1,11 @@
 fs = require("fs");
 
 key = "jzgqcdpd";
+//key = "flqrgnkx";
 
 //if(fs.existsSync())
 
+//console.time("hashing");
 function DoHash(lengths){
 	var listSize = 256;
 	var list = Array(listSize).fill(0).map((e, i) => i);
@@ -35,16 +37,23 @@ function DoHash(lengths){
 	return sparse.map(b => b.reduce((acc, e, i, a) => acc ^ e, 0));
 }
 
-grid = Array(128).fill(key).map((e, i) => e + "-" + i).map(e => DoHash(e));
+grid = Array(128).fill(key).map((e, i) => e + "-" + i).map(DoHash);
 gridStr = grid.map(e => e.map(n => ("00000000000" + n.toString(2)).substr(-8)).join("")).join("\n");
+
+//console.log(gridStr);
+
+//console.timeEnd("hashing");
+
 console.log(gridStr.match(/1/g).length);
 
 grid = gridStr.split("\n").map(l => l.split("").map(c => parseInt(c)));
 
 function FloodFill(firstPos){
+	var count = 0;
 	var queue = [];
 	
 	function PushToQueue(p){
+		count++;
 		grid[p[0]][p[1]] = 0;
 		queue.push(p);
 	}
@@ -68,6 +77,7 @@ function FloodFill(firstPos){
 		if(CheckGrid(pos[0], pos[1] + 1)) PushToQueue([pos[0], pos[1] + 1]);
 		//console.log(queue.length);
 	}
+	return count;
 }
 
 function FindPos(){
@@ -80,7 +90,12 @@ function FindPos(){
 }
 
 var numGroups, groupPos;
+var singleGroups = 0;
+var largestGroup = 0;
 for(numGroups = 0; groupPos = FindPos(); numGroups++){
-	FloodFill(groupPos);
+	groupSize = FloodFill(groupPos);
+	if(groupSize == 1) singleGroups++;
+	if(groupSize > largestGroup) largestGroup = groupSize;
 }
 console.log(numGroups);
+//console.log(singleGroups, largestGroup);
