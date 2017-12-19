@@ -22,6 +22,7 @@ console.log(4, progs.join(""));
 dance.forEach(m => moves[m[0]](m.substr(1).split("/")[0], m.split("/")[1]));
 console.log(5, progs.join(""));
 */
+console.time("potato");
 progs = progsInLine.slice();
 dance.filter(m => m[0] != "p").forEach(m => moves[m[0]](m.substr(1).split("/")[0], m.split("/")[1]));
 permutationNoP = progs.map(e => progsInLine.indexOf(e));
@@ -88,3 +89,4 @@ for(var done = 0; done < 1000000000; done += 1){
 }
 console.log(progs.join(""));
 */
+console.timeEnd("potato");
