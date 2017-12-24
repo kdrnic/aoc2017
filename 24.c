@@ -22,7 +22,7 @@ int is_heavier(bridge *a, bridge *b)
 }
 
 #define LOW_UINT(a) ((a) & cast64(0xFFFFFFFF))
-#define HIGH_UINT(a) ((a) >> cast64(32))
+#define HIGH_UINT(a) ((a) >> cast64(32)))
 
 #define bridge_length(a) (__builtin_popcount((unsigned int) LOW_UINT((a).c)) + \
 	__builtin_popcount((unsigned int) HIGH_UINT((a).c)))
