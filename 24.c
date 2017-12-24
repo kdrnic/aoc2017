@@ -22,30 +22,42 @@ int is_heavier(bridge *a, bridge *b)
 
 int (*is_better)(bridge *, bridge *); // function pointer for comparison function
 
+int queue_length = 0;
 bridge expand_bridge(bridge *b)
 {
-	bridge topb = {0, 0, 0};
+	bridge topb = {0, 0, -999};
 	int i;
 	uint64_t j;
 	
 	for(i = 0, j = 1; i < num_comps; i++, j = j << cast64(1))
 	{
-		bridge newb;
+		bridge newb = {0, 0, 0};
 		
 		if(b->c & j) continue; // this component has been used
 		if(!(comps[i] & b->p)) continue; // component doesn't have port
 		
+		topb.w = -988;
+		
 		newb = *b;
 		newb.w += compw[i];
 		newb.c |= j; // use this component
-		newb.p = (~j) & comps[i]; // tries to find the other port of the component
-		if(!newb.p) newb.p = j; // in case component has two same ports
+		newb.p = ~(b->p);
+		newb.p &= comps[i]; // tries to find the other port of the component
+		if(!newb.p) newb.p = b->p; // in case component has two same ports
 		
+		queue_length++;
 		newb = expand_bridge(&newb);
 		if(is_better(&newb, &topb)) topb = newb;
 	}
 	
+	//queue_length--;
 	return topb;
+}
+
+void print_bridge(bridge *b)
+{
+	printf("w: %04d   p:%"PRIu64" c:%"PRIu64"\n", b->w, b->p, b->c);
+	fflush(stdout);
 }
 
 int main()
@@ -63,14 +75,14 @@ int main()
 	{
 		comps[num_comps] = (cast64(1) << cast64(porta)) | (cast64(1) << cast64(portb));
 		compw[num_comps] = porta + portb;
-		//printf("%02d/%02d %04d %"PRIu64"\n", porta, portb, compw[num_comps], comps[num_comps]);
+		printf("%02d/%02d %04d %"PRIu64"\n", porta, portb, compw[num_comps], comps[num_comps]);
 		num_comps++;
 	}
 	
 	is_better = &is_heavier;
-	
+	print_bridge(&startb);
 	heavyb = expand_bridge(&startb);
-	printf("%d\n", heavyb.w);
+	printf("%d %d\n", heavyb.w, queue_length);
 	
 	return 0;
 }
