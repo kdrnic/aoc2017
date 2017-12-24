@@ -14,35 +14,46 @@ typedef struct bridge
 	unsigned int w; // weight
 } bridge;
 
-// part 1 comparison
 int is_heavier(bridge *a, bridge *b)
 {
 	if(a->w > b->w) return 1;
 	return 0;
 }
 
+<<<<<<< HEAD
 #define LOW_UINT(a) ((a) & cast64(0xFFFFFFFF))
 #define HIGH_UINT(a) ((a) >> cast64(32)))
-
-#define bridge_length(a) (__builtin_popcount((unsigned int) LOW_UINT((a).c)) + \
-	__builtin_popcount((unsigned int) HIGH_UINT((a).c)))
-
-// part 2 comparison
-int is_better(bridge *a, bridge *b)
+=======
+#define bridge_length(a) (__builtin_popcount((unsigned int) ((a).c & cast64(0xFFFFFFFF))) + \
+	__builtin_popcount((unsigned int) ((a).c >> cast64(32))))
+int is_longer(bridge *a, bridge *b)
 {
-	unsigned int la = bridge_length(*a);
-	unsigned int lb = bridge_length(*b);
-	if(la > lb) return 1;
-	if(la == lb)
+	if(bridge_length(*a) > bridge_length(*b)) return 1;
+	return 0;
+}
+>>>>>>> parent of 11e4b5f... single expansion
+
+int good_length = 0;
+
+int is_gooder(bridge *a, bridge *b)
+{
+	if(bridge_length(*a) == good_length)
 	{
-		if(a->w > b->w) return 1;
-		return 0;
+		if(bridge_length(*b) == good_length)
+		{
+			if(a->w > b->w) return 1;
+			return 0;
+		}
+		return 1;
 	}
 	return 0;
 }
 
-void expand_bridge(bridge *b, bridge *topb1, bridge *topb2)
+int (*is_better)(bridge *, bridge *); // function pointer for comparison function
+
+bridge expand_bridge(bridge *b)
 {
+	bridge topb = *b;
 	int i;
 	uint64_t j;
 	
@@ -59,18 +70,18 @@ void expand_bridge(bridge *b, bridge *topb1, bridge *topb2)
 		newb.p &= comps[i]; // tries to find the other port of the component
 		if(!newb.p) newb.p = b->p; // in case component has two same ports
 		
-		if(is_heavier(&newb, topb1)) *topb1 = newb;
-		if(is_better(&newb, topb2)) *topb2 = newb;
-		
-		expand_bridge(&newb, topb1, topb2);
+		newb = expand_bridge(&newb);
+		if(is_better(&newb, &topb)) topb = newb;
 	}
+	
+	return topb;
 }
 
 int main()
 {
 	FILE *inf = fopen("./input24.txt", "r");
 	int porta, portb;
-	bridge startb = {0, 1, 0}, bestb1 = {0, 1, 0}, bestb2 = {0, 1, 0};
+	bridge startb = {0, 1, 0}, heavyb, longb, bestb;
 	
 	if(!inf)
 	{
@@ -85,9 +96,17 @@ int main()
 		num_comps++;
 	}
 	
-	expand_bridge(&startb, &bestb1, &bestb2);
+	is_better = &is_heavier;
+	heavyb = expand_bridge(&startb);
+	printf("%d\n", heavyb.w);
 	
-	printf("%d, %d\n", bestb1.w, bestb2.w);
+	is_better = &is_longer;
+	longb = expand_bridge(&startb);
+	good_length = bridge_length(longb);
+	is_better = &is_gooder;
+	bestb = expand_bridge(&startb);
+	
+	printf("l: %d, w: %d\n", good_length, bestb.w);
 	
 	return 0;
 }
