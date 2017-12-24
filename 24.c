@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 int main()
 {
@@ -13,9 +13,10 @@ int main()
 		printf("ERROR!!!!");
 		return 1;
 	}
-	while(fscanf(inf, "%d,%d", &porta, &portb) == 2)
+	while(fscanf(inf, "%d/%d", &porta, &portb) == 2)
 	{
-		comps[num_comps++] = porta | portb;
+		comps[num_comps++] = (1 << ((uint64_t) porta)) | (1 << ((uint64_t) portb));
+		printf("%02d/%02d    %"PRIu64"\n", porta, portb, comps[num_comps - 1]);
 	}
 	return 0;
 }
