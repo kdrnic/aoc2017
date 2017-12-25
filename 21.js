@@ -7,8 +7,7 @@ size = 3;
 function Extract(x, y, s){
 	var res = "";
 	for(var _y = y, j = 0; _y < y + s; _y++, j++){
-		var line = pattern;
-		for(var i = 0; i < _y; i++) line = line.match(/[\.#]+\/(.*)/)[1];
+		var line = pattern.substr(_y * (size + 1)); 
 		if(j) res += "/";
 		res += line.substr(x, s);
 	}
@@ -65,8 +64,32 @@ function Reconstitute(nps, s){
 	return res;
 }
 
+GenSquares = s => Array(Math.pow(2, s * s)).fill(0).map(
+	(e, i) => ("0000000000" + i.toString(2)).substr(-(s * s)).replace(/0/g, ".").replace(/1/g, "#")
+).map(e => e.match(new RegExp(".{1," + s + "}", "g")).join("/"));
+
+if(!fs.existsSync("./21.json")){
+	console.log("Generating master book...");
+	allSquares = GenSquares(2).concat(GenSquares(3));
+	masterBook = allSquares.map(function(e, i, a){
+		var s = {5: 2, 11: 3}[e.length];
+		var bk = GenOps(e, s).filter(p => book.has(p))[0];
+		if(!bk) console.log(np, GenOps(np,s));
+
+		if(i % Math.floor(allSquares.length / 10) == 0) console.log(Math.floor(i / Math.floor(allSquares.length / 10)) + "0%");
+
+		return [e, book.get(bk)];
+	});
+	console.log("Done!");
+	fs.writeFileSync("21.json", JSON.stringify(masterBook));
+}
+//console.log("Reading master book...");
+masterBook = JSON.parse(fs.readFileSync("21.json").toString());
+//console.log("Done!");
+masterBook = new Map(masterBook);
+
 for(var i = 0; i < 18; i++){
-	console.time(i);
+	//console.time(i);
 	var s = 0;
 	if(size % 2 == 0) s = 2;
 	else if(size % 3 == 0) s = 3;
@@ -77,9 +100,7 @@ for(var i = 0; i < 18; i++){
 	for(var y = 0; y < size / s; y++){
 		for(var x = 0; x < size / s; x++){
 			var np = Extract(x * s, y * s, s);
-			var bk = GenOps(np, s).filter(p => book.has(p))[0];
-			if(!bk) console.log(np, GenOps(np,s));
-			nps.push(book.get(bk));
+			nps.push(masterBook.get(np));
 		}
 	}
 	
@@ -97,6 +118,6 @@ for(var i = 0; i < 18; i++){
 	if(i + 1 == 5) console.log(pattern.match(/#/g).length);
 	if(i + 1 == 18) console.log(pattern.match(/#/g).length);
 	
-	console.timeEnd(i);
+	//console.timeEnd(i);
 }
 //console.log(pattern.replace(/\//g, "\n"));
