@@ -1,3 +1,10 @@
+// uses input by 18.js
+// build with:
+//  gcc 18.c -o 18.exe -lm
+// to play:
+// ./18.exe | aplay -f U8 -r 44100
+// arecord instead of aplay to record
+
 #include <stdio.h>
 #include <math.h>
 
