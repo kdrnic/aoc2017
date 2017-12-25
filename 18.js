@@ -5,8 +5,16 @@ prog = inp.map(l => l.split(" "));
 registers = {};
 GetVal = a => registers[a] || parseInt(a);
 frequency = 0;
+sounds = [];
+oldClock = 0;
 instrSet = {
-	snd: x => (frequency = GetVal(x), 1),
+	snd: function(x){
+		if(frequency){
+			sounds.push([frequency, clock - oldClock]);
+		}
+		frequency = GetVal(x);
+		return 1;
+	},
 	set: (x, y) => (registers[x] = GetVal(y), 1),
 	add: (x, y) => (registers[x] += GetVal(y), 1),
 	mul: (x, y) => (registers[x] *= GetVal(y), 1),
@@ -14,8 +22,17 @@ instrSet = {
 	rcv: x => (GetVal(x) > 0) ? (console.log(frequency), -999) : 1,
 	jgz: (x, y) => (GetVal(x) > 0) ? GetVal(y) : 1,
 };
+clock = 0;
 pc = 0;
-while(pc >= 0 && pc < prog.length) pc += instrSet[prog[pc][0]](prog[pc][1], prog[pc][2]);
+while(pc >= 0 && pc < prog.length){
+	pc += instrSet[prog[pc][0]](prog[pc][1], prog[pc][2]);
+	clock++;
+}
+
+if(frequency){
+	sounds.push([frequency, clock - oldClock]);
+}
+fs.writeFileSync("./18.json", JSON.stringify(sounds));
 
 instrSet["snd"] = x => (thread.push(GetVal(x)), sent[pid]++, 1);
 instrSet["rcv"] = x => otherThread.length > 0 ? (registers[x] = otherThread.shift(), 1) : 0;
